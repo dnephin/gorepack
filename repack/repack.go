@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
 	"strings"
 
 	"github.com/pkg/errors"
@@ -27,9 +26,8 @@ type RenameOpts struct {
 }
 
 type fileRenameOpts struct {
-	Canonical bool
-	Package   string
-	Imports   map[string]string
+	Package string
+	Imports map[string]string
 }
 
 func (o RenameOpts) excludeSet() stringset {
@@ -114,9 +112,9 @@ func scanFile(file sourcefile, opts fileRenameOpts) ([]byte, error) {
 	fset := token.NewFileSet()
 	fileTokens := fset.AddFile(file.path, fset.Base(), len(file.raw))
 
-	var err error
+	var scanError error
 	errHandler := func(pos token.Position, msg string) {
-		err = errors.Errorf("error scanning at %s: %s", pos, msg)
+		scanError = errors.Errorf("error scanning at %s: %s", pos, msg)
 	}
 	fileScanner := &scanner.Scanner{}
 	fileScanner.Init(fileTokens, file.raw, errHandler, scanner.ScanComments)
@@ -132,11 +130,12 @@ func scanFile(file sourcefile, opts fileRenameOpts) ([]byte, error) {
 			err = buf.pkg(fileScanner, opts)
 		case tok == token.IMPORT:
 			err = buf.imports(fileScanner, opts.Imports)
-		default:
-			//fmt.Printf("%d: (%s) %s\n", pos, tok, literal)
 		}
 		if err != nil {
 			return nil, err
+		}
+		if scanError != nil {
+			return nil, scanError
 		}
 	}
 }
@@ -187,14 +186,14 @@ func (b *buffer) imports(fileScanner *scanner.Scanner, replacements map[string]s
 			if tok == token.IDENT {
 				continue
 			}
-			b.importStatement(pos, tok, literal, replacements)
+			b.importStatement(pos, literal, replacements)
 		}
 	case token.IDENT:
 		// import with an alias, the next token should be the import
 		return b.imports(fileScanner, replacements)
 	case token.STRING:
 		// single import with no alias
-		b.importStatement(pos, tok, literal, replacements)
+		b.importStatement(pos, literal, replacements)
 	case token.EOF:
 	default:
 		return errors.Errorf("expected an import token at %d, got (%s) %s", pos, tok, literal)
@@ -202,7 +201,7 @@ func (b *buffer) imports(fileScanner *scanner.Scanner, replacements map[string]s
 	return nil
 }
 
-func (b *buffer) importStatement(pos token.Pos, tok token.Token, literal string, replacements map[string]string) {
+func (b *buffer) importStatement(pos token.Pos, literal string, replacements map[string]string) {
 	for source, target := range replacements {
 		if !strings.HasPrefix(literal, `"`+source) {
 			continue

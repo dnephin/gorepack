@@ -2,6 +2,7 @@
   "Vendor": true,
   "Deadline": "1m",
   "Sort": ["linter", "severity", "path", "line"],
+  "Skip": ["testdata"],
 
   "Enable": [
     "deadcode",
