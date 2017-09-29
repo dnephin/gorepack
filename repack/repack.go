@@ -22,7 +22,8 @@ type RenameOpts struct {
 	Imports map[string]string
 	// Packages is a map of relative file path to the name of the new package
 	Packages map[string]string
-	Exclude  []string
+	// Exclude is a list of relative paths to exclude from the renaming.
+	Exclude []string
 }
 
 type fileRenameOpts struct {
@@ -39,9 +40,9 @@ func (o RenameOpts) excludeSet() stringset {
 	return stringset{items: exclude}
 }
 
-func (o RenameOpts) fileOpts(path string) fileRenameOpts {
+func (o RenameOpts) fileOpts(dirPath string) fileRenameOpts {
 	return fileRenameOpts{
-		Package: o.Packages[path],
+		Package: o.Packages[dirPath],
 		Imports: o.Imports,
 	}
 }
@@ -51,12 +52,16 @@ func (o RenameOpts) fileOpts(path string) fileRenameOpts {
 func Rename(root string, opts RenameOpts) error {
 	exclude := opts.excludeSet()
 	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		relPath, err := filepath.Rel(root, path)
 		switch {
 		case err != nil:
 			return err
-		case exclude.contains(path) && info.IsDir():
+		case exclude.contains(relPath) && info.IsDir():
 			return filepath.SkipDir
-		case exclude.contains(path) || info.IsDir():
+		case exclude.contains(relPath) || info.IsDir():
 			return nil
 		}
 
@@ -64,11 +69,7 @@ func Rename(root string, opts RenameOpts) error {
 		if err != nil {
 			return err
 		}
-		relPath, err := filepath.Rel(root, filepath.Dir(path))
-		if err != nil {
-			return err
-		}
-		return renameInFile(file, opts.fileOpts(relPath))
+		return renameInFile(file, opts.fileOpts(filepath.Dir(relPath)))
 	})
 }
 
