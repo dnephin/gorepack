@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+exec filewatcher \
+    -x 'vendor' \
+    -x 'scripts' \
+    scripts/test-unit './${dir}'

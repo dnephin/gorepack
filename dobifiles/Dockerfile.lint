@@ -1,0 +1,16 @@
+FROM    golang:1.9-alpine
+
+RUN     apk add -U git
+
+ARG     GOMETALINTER_SHA=0960299513738ff031fe418b3fcd4f6badc1a095
+RUN     go get -d github.com/alecthomas/gometalinter && \
+        cd /go/src/github.com/alecthomas/gometalinter && \
+        git checkout -q "$GOMETALINTER_SHA" && \
+        go build -v -o /usr/local/bin/gometalinter . && \ 
+        gometalinter --install && \
+        rm -rf /go/src/* /go/pkg/*
+
+WORKDIR /go/src/github.com/dnephin/gorepack
+ENV     CGO_ENABLED=0
+ENTRYPOINT ["/usr/local/bin/gometalinter"]
+CMD     ["--config=gometalinter.json", "./..."]
