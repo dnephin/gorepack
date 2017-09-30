@@ -31,9 +31,15 @@
   revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
   version = "v1.1.4"
 
+[[projects]]
+  name = "gopkg.in/src-d/go-git.v4"
+  packages = ["plumbing","plumbing/format/index","plumbing/object","plumbing/storer","utils/binary","utils/ioutil"]
+  revision = "c9353b2bd7c1cbdf8f78dad6deac64ed2f2ed9eb"
+  version = "v4.0.0-rc5"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "54efd363c7e0ab1cd76db3c20ed508e1b18e62d0c52cf0ea7db7216b7f5ac5ee"
+  inputs-digest = "11e0068e5248cf26e4b04a7150cab4bf06c0de87fdb358b7d33f1001411a6a6f"
   solver-name = "gps-cdcl"
   solver-version = 1
