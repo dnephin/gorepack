@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -19,8 +20,8 @@ import (
 type RenameOpts struct {
 	// Imports is a mapping of source imports paths to target import paths
 	Imports map[string]string
-	// Packages is a map of relative file path to the name of the new package
-	Packages map[string]string
+	// Package is the base url for the vanity url
+	Package string
 	// Exclude is a list of relative paths to exclude from the renaming.
 	Exclude []string
 }
@@ -40,7 +41,7 @@ func (o RenameOpts) excludeSet() stringset {
 
 func (o RenameOpts) fileOpts(dirPath string) fileRenameOpts {
 	return fileRenameOpts{
-		Package: o.Packages[dirPath],
+		Package: path.Join(o.Package, dirPath),
 		Imports: o.Imports,
 	}
 }
@@ -166,9 +167,13 @@ func (b *buffer) pkg(fileScanner *scanner.Scanner, opts fileRenameOpts) error {
 		return errors.Errorf(
 			"expected a package name token at %d, got (%s) %s", pos, tok, literal)
 	}
+	if literal == "main" {
+		return nil
+	}
+
 	beforeTokenPos := int(pos - 1)
 	b.writeToPos(beforeTokenPos)
-	b.buf.WriteString(opts.Package)
+	b.buf.WriteString(literal + ` // import "` + opts.Package + `"`)
 
 	b.last = beforeTokenPos + len(literal)
 	return nil

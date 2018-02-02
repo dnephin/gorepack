@@ -20,9 +20,7 @@ func TestRename(t *testing.T) {
 		Imports: map[string]string{
 			"example.com/user/pkgsource": "vanity.fake/newsy",
 		},
-		Packages: map[string]string{
-			".": `newsy // import "vanity.fake/newsy"`,
-		},
+		Package: "vanity.fake/newsy",
 	}
 
 	err := Rename(tmp.Path(), opts)

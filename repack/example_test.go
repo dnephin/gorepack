@@ -5,7 +5,7 @@ package repack
 func ExampleRename() {
 	err := Rename("./path/to/repo", RenameOpts{
 		Imports:  map[string]string{"github.com/user/repo": "example.com/newname"},
-		Packages: map[string]string{".": "newname"},
+		Package: "example.com/newname",
 		Exclude:  []string{"vendor"},
 	})
 	if err != nil {

@@ -1,5 +1,5 @@
 //Package util provides things for foo
-package util
+package util // import "vanity.fake/newsy/util"
 
 import "vanity.fake/newsy/util/sub"
 

@@ -2,7 +2,7 @@
 // And more legal stuff
 //
 // And more after an empty line
-package sub
+package sub // import "vanity.fake/newsy/util/sub"
 
 func Fireworks() string {
 	return "FIREWORKS"

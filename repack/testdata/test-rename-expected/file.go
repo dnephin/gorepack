@@ -1,4 +1,4 @@
-package newsy // import "vanity.fake/newsy"
+package pkgsource // import "vanity.fake/newsy"
 
 import (
 	"fmt"
