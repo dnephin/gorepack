@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	fmt "fmt"
 )
 
 // RenameOpts are options available to RenamePackage
@@ -54,16 +55,24 @@ func Rename(root string, opts RenameOpts) error {
 		if err != nil {
 			return err
 		}
+
+		if filepath.Ext(path) != ".go" {
+			return nil
+		}
+
 		relPath, err := filepath.Rel(root, path)
 		switch {
 		case err != nil:
 			return err
 		case exclude.contains(relPath) && info.IsDir():
+			fmt.Println("Skipping dir ", relPath)
 			return filepath.SkipDir
 		case exclude.contains(relPath) || info.IsDir():
+			fmt.Println("is Dir ", relPath)
 			return nil
 		}
 
+		fmt.Println(relPath)
 		file, err := newSourcefile(path, info.Mode())
 		if err != nil {
 			return err
